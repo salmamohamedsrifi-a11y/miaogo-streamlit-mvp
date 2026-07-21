@@ -5,13 +5,10 @@ import os
 
 st.set_page_config(
     page_title="MiaoGo MVP",
-    page_icon="🛍️",
+    page_icon="M",
     layout="wide"
 )
 
-# -----------------------------
-# Load store database
-# -----------------------------
 @st.cache_data
 def load_data():
     df = pd.read_csv("stores.csv")
@@ -20,70 +17,216 @@ def load_data():
 
 stores = load_data()
 
-# -----------------------------
-# Styling
-# -----------------------------
 st.markdown("""
 <style>
-    .main-title {
-        font-size: 44px;
-        font-weight: 800;
-        color: #2B145F;
-        margin-bottom: 0px;
-    }
-    .subtitle {
-        font-size: 18px;
-        color: #555;
-        margin-bottom: 25px;
-    }
-    .card {
-        background-color: #FFFFFF;
-        border: 1px solid #E7E2F3;
-        border-radius: 18px;
-        padding: 20px;
-        margin-bottom: 16px;
-        box-shadow: 0 2px 12px rgba(43, 20, 95, 0.06);
-    }
-    .purple-box {
-        background-color: #F4F0FF;
-        border-left: 5px solid #6F35D1;
-        border-radius: 12px;
-        padding: 18px;
-        margin-bottom: 18px;
-    }
-    .small-label {
-        color: #6F35D1;
-        font-weight: 700;
-        font-size: 14px;
-        text-transform: uppercase;
-    }
+.stApp {
+    background: linear-gradient(135deg, #0b1020 0%, #15122b 45%, #241447 100%);
+    color: #F8F7FF;
+}
+
+.block-container {
+    padding-top: 2rem;
+    padding-bottom: 4rem;
+    max-width: 1200px;
+}
+
+h1, h2, h3, h4, p, label, span, div {
+    color: #F8F7FF;
+}
+
+.hero {
+    padding: 34px 36px;
+    border-radius: 28px;
+    background: linear-gradient(135deg, rgba(125, 78, 255, 0.35), rgba(255, 255, 255, 0.06));
+    border: 1px solid rgba(255,255,255,0.18);
+    box-shadow: 0px 18px 45px rgba(0,0,0,0.28);
+    margin-bottom: 28px;
+}
+
+.logo {
+    width: 78px;
+    height: 78px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, #8F5BFF, #FF7AC8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    font-weight: 900;
+    color: white;
+    margin-bottom: 18px;
+}
+
+.hero-title {
+    font-size: 54px;
+    font-weight: 900;
+    letter-spacing: -1.5px;
+    margin-bottom: 4px;
+}
+
+.hero-subtitle {
+    font-size: 20px;
+    color: #D7D0FF;
+    max-width: 850px;
+    line-height: 1.5;
+}
+
+.section-card {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 24px;
+    padding: 24px;
+    margin: 18px 0;
+    box-shadow: 0px 14px 35px rgba(0,0,0,0.22);
+}
+
+.route-card {
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 22px;
+    padding: 22px;
+    min-height: 260px;
+    box-shadow: 0px 10px 28px rgba(0,0,0,0.20);
+}
+
+.route-number {
+    background: #8F5BFF;
+    color: white;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    margin-bottom: 14px;
+}
+
+.store-name {
+    font-size: 23px;
+    font-weight: 850;
+    color: white;
+    margin-bottom: 8px;
+}
+
+.meta {
+    color: #BDB4EA;
+    font-size: 14px;
+    margin-bottom: 14px;
+}
+
+.reason {
+    color: #F0EDFF;
+    font-size: 15px;
+    line-height: 1.45;
+}
+
+.mission-card {
+    background: rgba(255,255,255,0.09);
+    border-left: 5px solid #FF7AC8;
+    border-radius: 18px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 6px 11px;
+    border-radius: 999px;
+    background: rgba(143, 91, 255, 0.22);
+    color: #DCD4FF;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.note-box {
+    background: rgba(255, 122, 200, 0.12);
+    border: 1px solid rgba(255, 122, 200, 0.28);
+    border-radius: 18px;
+    padding: 18px 20px;
+    margin: 16px 0;
+}
+
+.metric-box {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 18px;
+    padding: 16px;
+    text-align: center;
+}
+
+.metric-num {
+    font-size: 30px;
+    font-weight: 900;
+    color: #FF7AC8;
+}
+
+.metric-label {
+    color: #D7D0FF;
+    font-size: 14px;
+}
+
+[data-testid="stMetricValue"] {
+    color: #FF7AC8;
+}
+
+.stButton > button {
+    background: linear-gradient(135deg, #8F5BFF, #FF7AC8);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 0.7rem 1.2rem;
+    font-weight: 800;
+}
+
+.stButton > button:hover {
+    border: none;
+    color: white;
+    filter: brightness(1.08);
+}
+
+div[data-testid="stDataFrame"] {
+    background: white;
+    border-radius: 16px;
+}
+
+input, textarea {
+    color: #111 !important;
+}
+
+.stSelectbox div, .stNumberInput div, .stTextInput div, .stTextArea div {
+    color: #111;
+}
 </style>
 """, unsafe_allow_html=True)
 
-# -----------------------------
-# Helper functions
-# -----------------------------
-def safe_text(row, col, default=""):
-    if col in row and pd.notna(row[col]):
-        return str(row[col])
-    return default
+
+def safe(row, col, default=""):
+    try:
+        value = row.get(col, default)
+        if pd.isna(value):
+            return default
+        return str(value)
+    except Exception:
+        return default
+
 
 def score_store(row, budget, style, goal, priority):
     score = 0
     text = " ".join([
-        safe_text(row, "store_name"),
-        safe_text(row, "category"),
-        safe_text(row, "sub_category"),
-        safe_text(row, "best_for"),
-        safe_text(row, "style_tags"),
-        safe_text(row, "target_user"),
-        safe_text(row, "keywords"),
-        safe_text(row, "ai_reason")
+        safe(row, "store_name"),
+        safe(row, "category"),
+        safe(row, "sub_category"),
+        safe(row, "best_for"),
+        safe(row, "style_tags"),
+        safe(row, "target_user"),
+        safe(row, "keywords"),
+        safe(row, "ai_reason")
     ]).lower()
 
-    user_words = f"{style} {goal} {priority}".lower().split()
-
-    for word in user_words:
+    user_text = f"{style} {goal} {priority}".lower()
+    for word in user_text.split():
         if len(word) > 2 and word in text:
             score += 3
 
@@ -91,36 +234,37 @@ def score_store(row, budget, style, goal, priority):
         min_b = float(row.get("budget_min_rmb", 0))
         max_b = float(row.get("budget_max_rmb", 99999))
         if min_b <= budget <= max_b:
-            score += 5
-        elif budget >= min_b * 0.7 and budget <= max_b * 1.3:
-            score += 2
-    except:
+            score += 6
+        elif budget >= min_b * 0.7 and budget <= max_b * 1.35:
+            score += 3
+    except Exception:
         pass
 
-    category = safe_text(row, "category").lower()
+    category = safe(row, "category").lower()
 
-    if "outfit" in goal.lower() or "clothes" in goal.lower() or "fashion" in goal.lower():
-        if "fashion" in category or "sportswear" in category:
+    if any(x in user_text for x in ["outfit", "clothes", "fashion", "cute", "style"]):
+        if any(x in category for x in ["fashion", "sportswear", "beauty"]):
             score += 5
 
-    if "shoe" in goal.lower() or "sneaker" in goal.lower():
-        if "sport" in category or "shoe" in text or "sneaker" in text:
-            score += 5
+    if any(x in user_text for x in ["shoe", "shoes", "sneaker", "sneakers"]):
+        if any(x in text for x in ["shoe", "sneaker", "nike", "sportswear"]):
+            score += 6
 
-    if "beauty" in goal.lower() or "makeup" in goal.lower() or "skincare" in goal.lower():
-        if "beauty" in category:
-            score += 5
+    if any(x in user_text for x in ["beauty", "makeup", "skincare"]):
+        if "beauty" in category or "skincare" in text or "makeup" in text:
+            score += 6
 
-    if "gift" in goal.lower():
+    if "gift" in user_text:
         if "gift" in text or "lifestyle" in category or "entertainment" in category:
-            score += 5
+            score += 6
 
     return score
+
 
 def generate_route(df, budget, available_time, style, goal, priority):
     temp = df.copy()
     temp["score"] = temp.apply(lambda row: score_store(row, budget, style, goal, priority), axis=1)
-    temp = temp.sort_values(by="score", ascending=False)
+    temp = temp.sort_values("score", ascending=False)
 
     route = []
     total_time = 0
@@ -130,83 +274,88 @@ def generate_route(df, budget, available_time, style, goal, priority):
         if total_time + estimated <= available_time:
             route.append(row)
             total_time += estimated
-        if len(route) >= 4:
+        if len(route) == 4:
             break
 
     if len(route) < 3:
         route = [row for _, row in temp.head(4).iterrows()]
-        total_time = sum([int(r.get("estimated_time_min", 20)) for r in route])
+        total_time = sum(int(r.get("estimated_time_min", 20)) for r in route)
 
     return route, total_time
 
-def adapt_route(change_text, current_route, df):
+
+def adapt_route(change_text, df):
     text = change_text.lower()
 
-    if "nike" in text or "shoe" in text or "sneaker" in text:
-        focus = "shoes and sporty casual style"
-        bonus = "Bonus mission: Try 2 sneaker styles and compare comfort, price, and outfit match."
-        reward = "Extra reward: Unlock a shoe-related coupon or bonus points."
-        filtered = df[df.apply(lambda r: "nike" in str(r).lower() or "shoe" in str(r).lower() or "sneaker" in str(r).lower() or "sport" in str(r).lower(), axis=1)]
-    elif "beauty" in text or "makeup" in text or "skincare" in text or "sephora" in text:
-        focus = "beauty and skincare"
-        bonus = "Bonus mission: Compare 2 beauty items and choose one that matches your outfit or skin need."
-        reward = "Extra reward: Unlock a beauty sample or skincare coupon."
-        filtered = df[df.apply(lambda r: "beauty" in str(r).lower() or "makeup" in str(r).lower() or "skincare" in str(r).lower(), axis=1)]
-    elif "hungry" in text or "coffee" in text or "tired" in text or "break" in text:
-        focus = "rest and food break"
-        bonus = "Bonus mission: Take a short break and check in before continuing the route."
-        reward = "Extra reward: Unlock coffee break points."
-        filtered = df[df.apply(lambda r: "coffee" in str(r).lower() or "food" in str(r).lower() or "break" in str(r).lower(), axis=1)]
+    if any(x in text for x in ["nike", "shoe", "sneaker"]):
+        focus = "Shoes and sporty casual style"
+        action = "MiaoGo noticed stronger interest in shoes, so it adds a shoe-focused bonus mission and adjusts the next stops."
+        bonus = "Try 2 sneaker styles and compare comfort, price, and outfit match."
+        reward = "Extra shoe coupon or bonus points"
+        mask = df.apply(lambda r: any(x in str(r).lower() for x in ["nike", "shoe", "sneaker", "sportswear"]), axis=1)
+
+    elif any(x in text for x in ["beauty", "makeup", "skincare", "sephora"]):
+        focus = "Beauty and skincare"
+        action = "MiaoGo detected interest in beauty products and shifts the journey toward matching beauty stops."
+        bonus = "Compare 2 beauty items and choose one that matches your outfit or skin need."
+        reward = "Beauty sample or skincare coupon"
+        mask = df.apply(lambda r: any(x in str(r).lower() for x in ["beauty", "makeup", "skincare", "sephora"]), axis=1)
+
+    elif any(x in text for x in ["tired", "coffee", "hungry", "break"]):
+        focus = "Rest and food break"
+        action = "MiaoGo detects fatigue and adds a short recovery stop before continuing the route."
+        bonus = "Take a short break and check in before continuing."
+        reward = "Coffee break points"
+        mask = df.apply(lambda r: any(x in str(r).lower() for x in ["coffee", "food", "break", "drink"]), axis=1)
+
     else:
-        focus = "changed shopping behavior"
-        bonus = "Bonus mission: MiaoGo adjusts your route based on what you spent more time exploring."
-        reward = "Extra reward: Unlock adaptive journey points."
-        filtered = df.sort_values(by="store_name").head(3)
+        focus = "Changed shopping behavior"
+        action = "MiaoGo adapts the route based on the user’s real-time behavior."
+        bonus = "Complete one adaptive mission based on your current interest."
+        reward = "Adaptive journey points"
+        mask = df.apply(lambda r: True, axis=1)
 
-    if len(filtered) == 0:
-        filtered = df.head(3)
+    suggested = df[mask].head(3)
+    if suggested.empty:
+        suggested = df.head(3)
 
-    suggested = filtered.head(3)
+    return focus, action, bonus, reward, suggested
 
-    return focus, bonus, reward, suggested
-
-# -----------------------------
-# Header
-# -----------------------------
-st.markdown('<div class="main-title">MiaoGo 喵逛</div>', unsafe_allow_html=True)
-st.markdown(
-    '<div class="subtitle">AI Shopping Journey Assistant for Yintai / Miaojie — interactive MVP demo</div>',
-    unsafe_allow_html=True
-)
 
 st.markdown("""
-<div class="purple-box">
-<b>Prototype note:</b> This MVP uses a structured Yintai mall dataset with prototype assumptions.
-It simulates how MiaoGo could later connect to real Miaojie member, store, coupon, location/check-in,
-and transaction data through secure APIs.
+<div class="hero">
+    <div class="logo">M</div>
+    <div class="hero-title">MiaoGo 喵逛</div>
+    <div class="hero-subtitle">
+        An interactive AI shopping journey MVP for Yintai / Miaojie. 
+        Users enter a budget, time, style, and shopping goal. MiaoGo generates a mall route, missions, rewards, and real-time journey updates.
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
-# -----------------------------
-# User input
-# -----------------------------
-st.header("1. Create Your Shopping Journey")
+with st.container():
+    st.markdown('<div class="section-card">', unsafe_allow_html=True)
+    st.subheader("Create your shopping journey")
 
-col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        budget = st.number_input("Budget / RMB", min_value=50, max_value=5000, value=200, step=50)
+    with col2:
+        available_time = st.slider("Available time", 30, 240, 120, 15)
+    with col3:
+        priority = st.selectbox(
+            "Main priority",
+            ["Best value", "Trendy style", "Beauty and skincare", "Gift shopping", "Fast route", "High-end experience"]
+        )
 
-with col1:
-    budget = st.number_input("Budget / 预算 (RMB)", min_value=50, max_value=5000, value=200, step=50)
-    available_time = st.slider("Available time / 可用时间 (minutes)", 30, 240, 120, 15)
+    col4, col5 = st.columns(2)
+    with col4:
+        style = st.text_input("Style", value="cute weekend outfit")
+    with col5:
+        goal = st.text_input("Shopping goal", value="outfit and shoes")
 
-with col2:
-    style = st.text_input("Style / 风格", value="cute weekend outfit")
-    goal = st.text_input("Shopping goal / 购物目标", value="outfit and shoes")
-    priority = st.selectbox(
-        "Main priority / 主要偏好",
-        ["Best value", "Trendy style", "Beauty and skincare", "Gift shopping", "Fast route", "High-end experience"]
-    )
-
-generate = st.button("Generate My MiaoGo Route", type="primary")
+    generate = st.button("Generate my MiaoGo route", type="primary")
+    st.markdown('</div>', unsafe_allow_html=True)
 
 if generate:
     route, total_time = generate_route(stores, budget, available_time, style, goal, priority)
@@ -214,96 +363,101 @@ if generate:
     st.session_state["total_time"] = total_time
     st.session_state["generated"] = True
 
-# -----------------------------
-# Route result
-# -----------------------------
 if st.session_state.get("generated", False):
     route = st.session_state["route"]
     total_time = st.session_state["total_time"]
 
-    st.header("2. Your AI-Generated Mall Route")
+    st.markdown('<div class="section-card">', unsafe_allow_html=True)
+    st.subheader("Your personalized AI route")
 
-    st.success(f"MiaoGo created a personalized route for: **{goal}** · Budget: **¥{budget}** · Time: **{available_time} min**")
+    m1, m2, m3, m4 = st.columns(4)
+    m1.markdown(f'<div class="metric-box"><div class="metric-num">{len(route)}</div><div class="metric-label">Stops</div></div>', unsafe_allow_html=True)
+    m2.markdown(f'<div class="metric-box"><div class="metric-num">{total_time}</div><div class="metric-label">Minutes</div></div>', unsafe_allow_html=True)
+    m3.markdown(f'<div class="metric-box"><div class="metric-num">¥{budget}</div><div class="metric-label">Budget</div></div>', unsafe_allow_html=True)
+    m4.markdown(f'<div class="metric-box"><div class="metric-num">AI</div><div class="metric-label">Adaptive route</div></div>', unsafe_allow_html=True)
 
-    cols = st.columns(len(route))
+    st.markdown("<br>", unsafe_allow_html=True)
 
+    cols = st.columns(4)
     for i, row in enumerate(route):
         with cols[i]:
             st.markdown(f"""
-            <div class="card">
-            <div class="small-label">Stop {i+1}</div>
-            <h3>{safe_text(row, "store_name")}</h3>
-            <b>Category:</b> {safe_text(row, "category")}<br>
-            <b>Location:</b> {safe_text(row, "zone")} · {safe_text(row, "floor")}<br>
-            <b>Time:</b> {safe_text(row, "estimated_time_min")} min<br><br>
-            <b>Why MiaoGo chose it:</b><br>
-            {safe_text(row, "ai_reason", safe_text(row, "best_for"))}
+            <div class="route-card">
+                <div class="route-number">{i+1}</div>
+                <div class="store-name">{safe(row, "store_name")}</div>
+                <div class="meta">{safe(row, "category")} · {safe(row, "zone")} · {safe(row, "floor")} · {safe(row, "estimated_time_min")} min</div>
+                <div class="reason">{safe(row, "ai_reason", safe(row, "best_for"))}</div>
             </div>
             """, unsafe_allow_html=True)
 
-    st.subheader("3. Missions + Rewards")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="section-card">', unsafe_allow_html=True)
+    st.subheader("Missions and rewards")
 
     for i, row in enumerate(route):
         st.markdown(f"""
-        <div class="card">
-        <b>{i+1}. {safe_text(row, "store_name")}</b><br>
-        <b>Mission:</b> {safe_text(row, "mission")}<br>
-        <b>Reward:</b> {safe_text(row, "reward")}<br>
-        <b>Repurchase reminder:</b> {safe_text(row, "repurchase_trigger")}
+        <div class="mission-card">
+            <div class="badge">Mission {i+1}</div>
+            <h4>{safe(row, "store_name")}</h4>
+            <p><b>Mission:</b> {safe(row, "mission")}</p>
+            <p><b>Reward:</b> {safe(row, "reward")}</p>
+            <p><b>Repurchase reminder:</b> {safe(row, "repurchase_trigger")}</p>
         </div>
         """, unsafe_allow_html=True)
 
-    st.info(f"Estimated route time: {total_time} minutes. MiaoGo can adjust this journey during the mall visit.")
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    # -----------------------------
-    # Real-time adaptation
-    # -----------------------------
-    st.header("4. Real-Time AI Adaptation")
+    st.markdown('<div class="section-card">', unsafe_allow_html=True)
+    st.subheader("Real-time AI adaptation")
 
     change_text = st.text_input(
-        "Tell MiaoGo what changed during your visit:",
+        "Tell MiaoGo what changed during the visit",
         value="I spent 25 minutes in Nike because I liked the shoes."
     )
 
-    if st.button("Update My Route"):
-        focus, bonus, reward, suggested = adapt_route(change_text, route, stores)
+    if st.button("Update route"):
+        focus, action, bonus, reward, suggested = adapt_route(change_text, stores)
 
         st.markdown(f"""
-        <div class="purple-box">
-        <h3>MiaoGo detected a new interest: {focus}</h3>
-        <p>{bonus}</p>
-        <p>{reward}</p>
+        <div class="note-box">
+            <h3>{focus}</h3>
+            <p>{action}</p>
+            <p><b>Bonus mission:</b> {bonus}</p>
+            <p><b>New reward:</b> {reward}</p>
         </div>
         """, unsafe_allow_html=True)
 
-        st.subheader("Updated next best stops")
+        st.write("Updated next best stops")
 
-        for _, row in suggested.iterrows():
-            st.markdown(f"""
-            <div class="card">
-            <b>{safe_text(row, "store_name")}</b> — {safe_text(row, "category")}<br>
-            <b>Reason:</b> {safe_text(row, "ai_reason", safe_text(row, "best_for"))}<br>
-            <b>Mission:</b> {safe_text(row, "mission")}<br>
-            <b>Reward:</b> {safe_text(row, "reward")}
-            </div>
-            """, unsafe_allow_html=True)
+        c1, c2, c3 = st.columns(3)
+        for col, (_, row) in zip([c1, c2, c3], suggested.iterrows()):
+            with col:
+                st.markdown(f"""
+                <div class="route-card">
+                    <div class="store-name">{safe(row, "store_name")}</div>
+                    <div class="meta">{safe(row, "category")} · {safe(row, "estimated_time_min")} min</div>
+                    <div class="reason">{safe(row, "ai_reason", safe(row, "best_for"))}</div>
+                    <br>
+                    <div class="reason"><b>Mission:</b> {safe(row, "mission")}</div>
+                </div>
+                """, unsafe_allow_html=True)
 
-    # -----------------------------
-    # Feedback
-    # -----------------------------
-    st.header("5. User Feedback")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="section-card">', unsafe_allow_html=True)
+    st.subheader("Feedback after testing")
 
     with st.form("feedback_form"):
-        rating = st.slider("Overall rating of this experience", 1, 5, 4)
-        would_use = st.radio("Would you use this if it existed inside Miaojie?", ["Yes", "Maybe", "No"])
-        open_more = st.radio("Would this make you open Miaojie more often?", ["Yes", "Maybe", "No"])
+        rating = st.slider("Overall rating", 1, 5, 4)
+        would_use = st.radio("Would you use this if it existed inside Miaojie?", ["Yes", "Maybe", "No"], horizontal=True)
+        open_more = st.radio("Would this make you open Miaojie more often?", ["Yes", "Maybe", "No"], horizontal=True)
         useful_part = st.selectbox(
             "Most useful part",
             ["AI route", "Missions", "Rewards/coupons", "Real-time adaptation", "Repurchase reminder"]
         )
-        improvement = st.text_area("What should we improve?")
-
-        submitted = st.form_submit_button("Submit Feedback")
+        improvement = st.text_area("What should be improved?")
+        submitted = st.form_submit_button("Submit feedback")
 
         if submitted:
             feedback = pd.DataFrame([{
@@ -322,27 +476,21 @@ if st.session_state.get("generated", False):
 
             file_exists = os.path.exists("feedback.csv")
             feedback.to_csv("feedback.csv", mode="a", header=not file_exists, index=False)
-
-            st.success("Thank you. Your feedback was saved for the MVP testing report.")
+            st.success("Feedback saved. Thank you for testing MiaoGo.")
 
     if os.path.exists("feedback.csv"):
         with open("feedback.csv", "rb") as f:
-            st.download_button(
-                "Download feedback CSV",
-                f,
-                file_name="miaogo_feedback.csv",
-                mime="text/csv"
-            )
+            st.download_button("Download feedback CSV", f, file_name="miaogo_feedback.csv", mime="text/csv")
+
+    st.markdown('</div>', unsafe_allow_html=True)
 
 else:
-    st.header("How to test this MVP")
-    st.write("""
-    1. Enter a budget, time, style, and shopping goal.  
-    2. Click **Generate My MiaoGo Route**.  
-    3. Review the route, missions, rewards, and repurchase reminder.  
-    4. Type a change like **“I spent 25 minutes in Nike”**.  
-    5. Submit feedback at the end.  
-    """)
+    st.markdown("""
+    <div class="section-card">
+        <h3>How to test the MVP</h3>
+        <p>Enter a shopping goal, generate a route, review the missions and rewards, then test real-time adaptation by typing something like: <b>I spent 25 minutes in Nike.</b></p>
+    </div>
+    """, unsafe_allow_html=True)
 
-    st.subheader("Database preview")
-    st.dataframe(stores.head(15), use_container_width=True)
+    with st.expander("Preview structured mall dataset"):
+        st.dataframe(stores.head(20), use_container_width=True)
