@@ -1,3 +1,4 @@
+
 from datetime import datetime
 import os
 import re
@@ -5,6 +6,7 @@ import html
 
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 
 st.set_page_config(
     page_title="MiaoGo MVP",
@@ -99,23 +101,23 @@ def generate_route(df, budget, available_time, style, goal, priority):
     temp = temp.sort_values("score", ascending=False)
 
     route = []
-    used_names = set()
+    names = set()
     total_time = 0
 
     for _, row in temp.iterrows():
         name = safe(row, "store_name")
-        if name in used_names:
+        if name in names:
             continue
         route.append(row)
-        used_names.add(name)
+        names.add(name)
         total_time += n(row.get("estimated_time_min", 20), 20)
-        if len(route) >= 4:
+        if len(route) == 4:
             break
 
     while len(route) < 4:
         route.append(df.iloc[len(route)])
 
-    return route[:4], total_time
+    return route, total_time
 
 def adapt_route(change_text, df):
     t = change_text.lower()
@@ -149,19 +151,10 @@ def adapt_route(change_text, df):
         suggested = df.head(3)
     return insight, action, bonus, reward, suggested
 
+# Streamlit page styling only
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-
-:root{
-    --ink:#17142B;
-    --muted:#817B97;
-    --soft:#FAF7FF;
-    --line:#EDE7F8;
-    --purple:#7B4DFF;
-    --pink:#FF7DBB;
-    --gold:#F4A622;
-}
 
 html, body, [class*="css"] {font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;}
 .stApp {
@@ -173,129 +166,39 @@ html, body, [class*="css"] {font-family: Inter, -apple-system, BlinkMacSystemFon
 .block-container {max-width:1240px; padding-top:1.2rem; padding-bottom:3rem;}
 #MainMenu, footer, header {visibility:hidden;}
 [data-testid="collapsedControl"] {display:none;}
-
-h1,h2,h3,h4,h5,h6,p,div,span,label {color:var(--ink); font-family:Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;}
-
-.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
-.brand{display:flex;align-items:center;gap:13px;}
-.logo{width:48px;height:48px;border-radius:16px;background:linear-gradient(135deg,var(--purple),var(--pink));display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:23px;box-shadow:0 14px 30px rgba(123,77,255,.23);}
-.brand-title{font-size:27px;font-weight:900;letter-spacing:-.8px;line-height:1;}
-.brand-sub{font-size:13px;color:var(--muted);margin-top:3px;}
-.pill{background:white;border:1px solid var(--line);border-radius:999px;padding:10px 15px;color:#5D38D6;font-weight:850;font-size:13px;box-shadow:0 10px 25px rgba(51,34,101,.08);}
-
-.hero{background:rgba(255,255,255,.82);border:1px solid var(--line);border-radius:32px;padding:30px;margin-bottom:22px;box-shadow:0 22px 55px rgba(51,34,101,.09);}
-.hero h1{font-size:48px;line-height:1.07;letter-spacing:-1.8px;margin:0 0 12px 0;font-weight:950;max-width:850px;}
-.grad{background:linear-gradient(135deg,var(--purple),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-.hero p{font-size:17px;color:var(--muted);line-height:1.55;max-width:800px;margin:0;}
-
-.input-card,.white-card,.phone-shell{background:white;border:1px solid var(--line);border-radius:30px;padding:24px;box-shadow:0 18px 45px rgba(51,34,101,.075);margin-bottom:22px;}
-.stButton>button{background:linear-gradient(135deg,var(--purple),var(--pink)) !important;color:white !important;border:0 !important;border-radius:999px !important;padding:.75rem 1.5rem !important;font-weight:900 !important;box-shadow:0 13px 28px rgba(123,77,255,.23) !important;}
+h1,h2,h3,h4,h5,h6,p,div,span,label {font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color:#17142B;}
+.app-card{background:white;border:1px solid #EDE7F8;border-radius:30px;padding:24px;box-shadow:0 18px 45px rgba(51,34,101,.075);margin-bottom:22px;}
+.hero-card{background:rgba(255,255,255,.82);border:1px solid #EDE7F8;border-radius:32px;padding:30px;margin-bottom:22px;box-shadow:0 22px 55px rgba(51,34,101,.09);}
+.hero-card h1{font-size:46px;line-height:1.07;letter-spacing:-1.8px;margin:0 0 12px 0;font-weight:950;max-width:850px;}
+.hero-card p{font-size:17px;color:#817B97;line-height:1.55;max-width:800px;margin:0;}
+.grad{background:linear-gradient(135deg,#7B4DFF,#FF7DBB);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.stButton>button{background:linear-gradient(135deg,#7B4DFF,#FF7DBB) !important;color:white !important;border:0 !important;border-radius:999px !important;padding:.75rem 1.5rem !important;font-weight:900 !important;box-shadow:0 13px 28px rgba(123,77,255,.23) !important;}
 .stButton>button:hover{color:white !important;filter:brightness(1.04);}
 input,textarea{color:#17142B !important;background:white !important;}
 div[data-baseweb="select"] span{color:#17142B !important;}
-
-.app-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
-.person{display:flex;align-items:center;gap:12px;}
-.avatar{width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#F2E9FF,#FFE1EF);border:1px solid #EEE5FF;position:relative;}
-.avatar:before{content:"";position:absolute;width:14px;height:14px;border-radius:50%;background:#FFD0E1;top:9px;left:18px;}
-.avatar:after{content:"";position:absolute;width:30px;height:22px;border-radius:20px 20px 14px 14px;background:#7B4DFF;bottom:5px;left:10px;}
-.greet{font-size:25px;font-weight:950;letter-spacing:-.5px;}
-.sub{font-size:14px;color:var(--muted);margin-top:2px;}
-.points{background:#FFF8E7;border:1px solid #FFE6A9;border-radius:999px;padding:10px 16px;color:#AA6A00;font-size:17px;font-weight:950;}
-
-.app-section-title{display:flex;align-items:center;justify-content:space-between;margin:18px 0 12px 0;}
-.app-section-title b{font-size:22px;font-weight:950;}
-.app-section-title span{font-size:14px;font-weight:850;color:var(--purple);}
-
-.pref-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
-.pref{background:white;border:1px solid var(--line);border-radius:22px;padding:18px;min-height:116px;box-shadow:0 10px 24px rgba(51,34,101,.055);}
-.pref-icon{width:34px;height:34px;border-radius:12px;background:#DDF7E8;margin-bottom:14px;}
-.pref:nth-child(2) .pref-icon{background:#E6F0FF;}
-.pref:nth-child(3) .pref-icon{background:#F1E2FF;}
-.pref-label{font-size:13px;color:var(--muted);font-weight:850;}
-.pref-value{font-size:25px;font-weight:950;letter-spacing:-.8px;margin-top:2px;}
-
-.route-map{height:360px;border:1px solid var(--line);border-radius:28px;background:
-    linear-gradient(rgba(255,255,255,.72),rgba(255,255,255,.72)),
-    repeating-linear-gradient(90deg, transparent 0 92px, rgba(123,77,255,.08) 92px 100px),
-    repeating-linear-gradient(0deg, transparent 0 82px, rgba(123,77,255,.08) 82px 90px),
-    linear-gradient(135deg,#F5EFFF,#FFF6FA);
-position:relative;overflow:hidden;margin-bottom:18px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.7);}
-.route-path{position:absolute;inset:0;z-index:1;pointer-events:none;}
-.pin{position:absolute;z-index:3;background:white;border:1px solid #E5DBFF;border-radius:19px;padding:12px 13px;width:210px;box-shadow:0 18px 38px rgba(73,45,140,.15);}
-.pin-title{font-size:14px;font-weight:950;display:flex;align-items:center;gap:8px;}
-.pin-num{width:31px;height:31px;background:linear-gradient(135deg,#7B4DFF,#A879FF);border-radius:11px 11px 11px 3px;transform:rotate(45deg);display:inline-flex;align-items:center;justify-content:center;flex:none;}
-.pin-num span{transform:rotate(-45deg);color:white;font-weight:950;}
-.pin-meta{font-size:12px;color:var(--muted);margin-top:6px;padding-left:40px;}
-.pin1{left:250px;top:58px;}
-.pin2{right:88px;top:126px;}
-.pin3{left:90px;bottom:82px;}
-.pin4{right:170px;bottom:42px;}
-.start{position:absolute;left:48px;top:94px;z-index:4;text-align:center;font-size:12px;color:#312B57;font-weight:850;}
-.start-dot{width:36px;height:36px;border-radius:50%;background:#17142B;color:white;display:flex;align-items:center;justify-content:center;font-weight:950;margin:0 auto 5px;}
-.end{position:absolute;right:36px;bottom:18px;z-index:4;text-align:center;font-size:11px;color:#312B57;font-weight:850;}
-.end-dot{width:24px;height:24px;border-radius:50%;background:#17142B;border:5px solid white;margin:0 auto 4px;box-shadow:0 5px 14px rgba(0,0,0,.18);}
-
-.mission-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px;}
-.mission-card{background:white;border:1px solid var(--line);border-radius:22px;padding:16px;min-height:165px;text-align:center;box-shadow:0 10px 24px rgba(51,34,101,.055);}
-.mission-icon{width:48px;height:48px;border-radius:17px;background:linear-gradient(135deg,#EFE7FF,#FFF0F7);margin:0 auto 13px;}
-.mission-title{font-size:14px;font-weight:900;line-height:1.25;min-height:55px;}
-.mission-points{font-size:14px;color:#C97900;font-weight:950;margin-top:10px;}
-.mission-state{display:inline-block;margin-top:8px;padding:6px 10px;border-radius:999px;background:#F0EAFF;color:var(--purple);font-size:12px;font-weight:900;}
-
-.reward-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
-.reward-card{background:white;border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 10px 24px rgba(51,34,101,.055);}
-.reward-num{font-size:31px;font-weight:950;color:#2B244D;letter-spacing:-.8px;}
-.reward-label{font-size:14px;color:var(--muted);font-weight:800;}
-
-.panel{background:#211E35;border-radius:30px;padding:24px;box-shadow:0 22px 55px rgba(33,20,74,.16);}
-.panel h3,.panel p,.panel div{color:white;}
-.panel p{color:#C8C1DD;line-height:1.5;font-size:14px;}
-.kpi{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:16px;margin-bottom:13px;}
-.kpi-val{font-size:31px;font-weight:950;color:white;}
-.kpi-lab{font-size:13px;color:#C8C1DD !important;}
-
-.detail-card{background:white;border:1px solid var(--line);border-radius:22px;padding:17px;min-height:185px;box-shadow:0 10px 24px rgba(51,34,101,.055);}
-.detail-index{font-size:12px;color:var(--purple);font-weight:950;}
-.detail-title{font-size:18px;font-weight:950;margin:6px 0;}
-.detail-meta{font-size:12px;color:var(--muted);margin-bottom:9px;}
-.detail-copy{font-size:13px;line-height:1.45;color:#423D5D;}
-.adapt-result{background:linear-gradient(135deg,#F3EEFF,#FFF5FA);border:1px solid #E6DAFF;border-radius:22px;padding:18px;margin-top:14px;}
-.adapt-result p{color:#5F5875;}
-
-.nav{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--line);padding-top:15px;text-align:center;font-size:13px;font-weight:900;color:#5F5875;}
-.nav div:first-child{color:var(--purple);}
-
-[data-testid="stForm"]{background:white;border:1px solid var(--line);border-radius:30px;padding:24px;box-shadow:0 18px 45px rgba(51,34,101,.075);}
-
-@media(max-width:900px){
-    .hero h1{font-size:34px;}
-    .pref-grid,.mission-grid,.reward-grid{grid-template-columns:1fr;}
-    .pin{position:relative;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;margin:10px;width:auto;}
-    .route-map{height:auto;padding-top:70px;padding-bottom:70px;}
-}
+[data-testid="stForm"]{background:white;border:1px solid #EDE7F8;border-radius:30px;padding:24px;box-shadow:0 18px 45px rgba(51,34,101,.075);}
 </style>
 """, unsafe_allow_html=True)
 
 st.markdown("""
-<div class="topbar">
-    <div class="brand">
-        <div class="logo">M</div>
-        <div>
-            <div class="brand-title">MiaoGo</div>
-            <div class="brand-sub">AI shopping journey assistant for Miaojie</div>
-        </div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+  <div style="display:flex;align-items:center;gap:13px;">
+    <div style="width:48px;height:48px;border-radius:16px;background:linear-gradient(135deg,#7B4DFF,#FF7DBB);display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:23px;box-shadow:0 14px 30px rgba(123,77,255,.23);">M</div>
+    <div>
+      <div style="font-size:27px;font-weight:900;letter-spacing:-.8px;line-height:1;">MiaoGo</div>
+      <div style="font-size:13px;color:#817B97;margin-top:3px;">AI shopping journey assistant for Miaojie</div>
     </div>
-    <div class="pill">Interactive MVP Demo</div>
+  </div>
+  <div style="background:white;border:1px solid #EDE7F8;border-radius:999px;padding:10px 15px;color:#5D38D6;font-weight:850;font-size:13px;box-shadow:0 10px 25px rgba(51,34,101,.08);">Interactive MVP Demo</div>
 </div>
 
-<div class="hero">
-    <h1>Plan mall journeys that feel personal, useful, and <span class="grad">worth opening the app for.</span></h1>
-    <p>MiaoGo lets users enter budget, time, style, and shopping goal. The MVP generates a guided Yintai mall route, shopping missions, rewards, and real-time journey updates using structured store data.</p>
+<div class="hero-card">
+  <h1>Plan mall journeys that feel personal, useful, and <span class="grad">worth opening the app for.</span></h1>
+  <p>MiaoGo lets users enter budget, time, style, and shopping goal. The MVP generates a guided Yintai mall route, shopping missions, rewards, and real-time journey updates using structured store data.</p>
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="input-card">', unsafe_allow_html=True)
+st.markdown('<div class="app-card">', unsafe_allow_html=True)
 st.subheader("Create a test journey")
 a, b, c = st.columns(3)
 with a:
@@ -325,113 +228,213 @@ cats = [esc(safe(r, "category", "Store")) for r in route]
 times = [esc(safe(r, "estimated_time_min", "20")) for r in route]
 missions = [esc(safe(r, "mission", "Complete a store mission.")) for r in route]
 
-left, right = st.columns([1.45, .55], gap="large")
-
-with left:
-    st.markdown(f"""
-    <div class="phone-shell">
-        <div class="app-top">
-            <div class="person">
-                <div class="avatar"></div>
-                <div>
-                    <div class="greet">Hi, Mia</div>
-                    <div class="sub">Let's plan your perfect mall trip</div>
-                </div>
-            </div>
-            <div class="points">2,480 pts</div>
-        </div>
-
-        <div class="app-section-title"><b>Your preferences</b><span>Edit</span></div>
-        <div class="pref-grid">
-            <div class="pref"><div class="pref-icon"></div><div class="pref-label">Budget</div><div class="pref-value">¥{budget}</div></div>
-            <div class="pref"><div class="pref-icon"></div><div class="pref-label">Time</div><div class="pref-value">{round(available_time/60,1)}h</div></div>
-            <div class="pref"><div class="pref-icon"></div><div class="pref-label">Style</div><div class="pref-value" style="font-size:20px;">{esc(style.title())}</div></div>
-        </div>
-
-        <div class="app-section-title"><b>Your AI Mall Journey</b><span>Est. {round(total_time/60,1)}h</span></div>
-        <div class="route-map">
-            <svg class="route-path" viewBox="0 0 900 360" preserveAspectRatio="none">
-                <path d="M90 145 C170 60, 295 70, 385 125 S585 170, 680 118 S845 130, 808 225 S625 318, 480 278 S255 246, 166 300"
-                    fill="none" stroke="#7B4DFF" stroke-width="6" stroke-linecap="round" stroke-dasharray="14 13" opacity=".88"/>
-            </svg>
-            <div class="start"><div class="start-dot">S</div>Start<br>Main entrance</div>
-            <div class="pin pin1"><div class="pin-title"><div class="pin-num"><span>1</span></div>{names[0]}</div><div class="pin-meta">{cats[0]} · {times[0]} min</div></div>
-            <div class="pin pin2"><div class="pin-title"><div class="pin-num"><span>2</span></div>{names[1]}</div><div class="pin-meta">{cats[1]} · {times[1]} min</div></div>
-            <div class="pin pin3"><div class="pin-title"><div class="pin-num"><span>3</span></div>{names[2]}</div><div class="pin-meta">{cats[2]} · {times[2]} min</div></div>
-            <div class="pin pin4"><div class="pin-title"><div class="pin-num"><span>4</span></div>{names[3]}</div><div class="pin-meta">{cats[3]} · {times[3]} min</div></div>
-            <div class="end"><div class="end-dot"></div>End<br>South exit</div>
-        </div>
-
-        <div class="app-section-title"><b>AI Shopping Missions</b><span>Ready to test</span></div>
-        <div class="mission-grid">
-            <div class="mission-card"><div class="mission-icon"></div><div class="mission-title">{missions[0][:70]}</div><div class="mission-points">+200 pts</div><div class="mission-state">Available</div></div>
-            <div class="mission-card"><div class="mission-icon"></div><div class="mission-title">{missions[1][:70]}</div><div class="mission-points">+100 pts</div><div class="mission-state">Available</div></div>
-            <div class="mission-card"><div class="mission-icon"></div><div class="mission-title">{missions[2][:70]}</div><div class="mission-points">+80 pts</div><div class="mission-state">Available</div></div>
-            <div class="mission-card"><div class="mission-icon"></div><div class="mission-title">{missions[3][:70]}</div><div class="mission-points">+120 pts</div><div class="mission-state">Available</div></div>
-        </div>
-
-        <div class="app-section-title"><b>Your Rewards</b><span>Prototype</span></div>
-        <div class="reward-grid">
-            <div class="reward-card"><div class="reward-num">2,480</div><div class="reward-label">Points</div></div>
-            <div class="reward-card"><div class="reward-num">3</div><div class="reward-label">Coupons</div></div>
-            <div class="reward-card"><div class="reward-num">5</div><div class="reward-label">Check-ins</div></div>
-        </div>
-
-        <br>
-        <div class="nav"><div>Home</div><div>Missions</div><div>Map</div><div>Rewards</div><div>Me</div></div>
+app_html = f"""
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{{box-sizing:border-box;}}
+body{{
+  margin:0;
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:transparent;
+  color:#17142B;
+}}
+.wrap{{
+  display:grid;
+  grid-template-columns: minmax(0,1.55fr) minmax(320px,.45fr);
+  gap:28px;
+  align-items:start;
+}}
+.shell{{
+  background:white;
+  border:1px solid #EDE7F8;
+  border-radius:30px;
+  padding:24px;
+  box-shadow:0 18px 45px rgba(51,34,101,.075);
+}}
+.top{{
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;
+}}
+.person{{display:flex;align-items:center;gap:12px;}}
+.avatar{{width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#F2E9FF,#FFE1EF);border:1px solid #EEE5FF;position:relative;}}
+.avatar:before{{content:"";position:absolute;width:14px;height:14px;border-radius:50%;background:#FFD0E1;top:9px;left:18px;}}
+.avatar:after{{content:"";position:absolute;width:30px;height:22px;border-radius:20px 20px 14px 14px;background:#7B4DFF;bottom:5px;left:10px;}}
+.greet{{font-size:25px;font-weight:950;letter-spacing:-.5px;}}
+.sub{{font-size:14px;color:#817B97;margin-top:2px;}}
+.points{{background:#FFF8E7;border:1px solid #FFE6A9;border-radius:999px;padding:10px 16px;color:#AA6A00;font-size:17px;font-weight:950;}}
+.sec{{display:flex;align-items:center;justify-content:space-between;margin:18px 0 12px;}}
+.sec b{{font-size:22px;font-weight:950;}}
+.sec span{{font-size:14px;font-weight:850;color:#7B4DFF;}}
+.prefgrid{{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}}
+.pref{{background:white;border:1px solid #EDE7F8;border-radius:22px;padding:18px;min-height:116px;box-shadow:0 10px 24px rgba(51,34,101,.055);}}
+.ico{{width:34px;height:34px;border-radius:12px;background:#DDF7E8;margin-bottom:14px;}}
+.pref:nth-child(2) .ico{{background:#E6F0FF;}}
+.pref:nth-child(3) .ico{{background:#F1E2FF;}}
+.lab{{font-size:13px;color:#817B97;font-weight:850;}}
+.val{{font-size:25px;font-weight:950;letter-spacing:-.8px;margin-top:2px;}}
+.map{{
+  height:360px;border:1px solid #EDE7F8;border-radius:28px;background:
+    linear-gradient(rgba(255,255,255,.72),rgba(255,255,255,.72)),
+    repeating-linear-gradient(90deg, transparent 0 92px, rgba(123,77,255,.08) 92px 100px),
+    repeating-linear-gradient(0deg, transparent 0 82px, rgba(123,77,255,.08) 82px 90px),
+    linear-gradient(135deg,#F5EFFF,#FFF6FA);
+  position:relative;overflow:hidden;margin-bottom:18px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.7);
+}}
+svg{{position:absolute;inset:0;z-index:1;pointer-events:none;}}
+.pin{{position:absolute;z-index:3;background:white;border:1px solid #E5DBFF;border-radius:19px;padding:12px 13px;width:210px;box-shadow:0 18px 38px rgba(73,45,140,.15);}}
+.ptitle{{font-size:14px;font-weight:950;display:flex;align-items:center;gap:8px;}}
+.num{{width:31px;height:31px;background:linear-gradient(135deg,#7B4DFF,#A879FF);border-radius:11px 11px 11px 3px;transform:rotate(45deg);display:inline-flex;align-items:center;justify-content:center;flex:none;}}
+.num span{{transform:rotate(-45deg);color:white;font-weight:950;}}
+.pmeta{{font-size:12px;color:#817B97;margin-top:6px;padding-left:40px;}}
+.pin1{{left:250px;top:58px;}}
+.pin2{{right:88px;top:126px;}}
+.pin3{{left:90px;bottom:82px;}}
+.pin4{{right:170px;bottom:42px;}}
+.start{{position:absolute;left:48px;top:94px;z-index:4;text-align:center;font-size:12px;color:#312B57;font-weight:850;}}
+.startdot{{width:36px;height:36px;border-radius:50%;background:#17142B;color:white;display:flex;align-items:center;justify-content:center;font-weight:950;margin:0 auto 5px;}}
+.end{{position:absolute;right:36px;bottom:18px;z-index:4;text-align:center;font-size:11px;color:#312B57;font-weight:850;}}
+.enddot{{width:24px;height:24px;border-radius:50%;background:#17142B;border:5px solid white;margin:0 auto 4px;box-shadow:0 5px 14px rgba(0,0,0,.18);}}
+.missiongrid{{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px;}}
+.mission{{background:white;border:1px solid #EDE7F8;border-radius:22px;padding:16px;min-height:165px;text-align:center;box-shadow:0 10px 24px rgba(51,34,101,.055);}}
+.mico{{width:48px;height:48px;border-radius:17px;background:linear-gradient(135deg,#EFE7FF,#FFF0F7);margin:0 auto 13px;}}
+.mtitle{{font-size:14px;font-weight:900;line-height:1.25;min-height:55px;}}
+.mpoints{{font-size:14px;color:#C97900;font-weight:950;margin-top:10px;}}
+.mstate{{display:inline-block;margin-top:8px;padding:6px 10px;border-radius:999px;background:#F0EAFF;color:#7B4DFF;font-size:12px;font-weight:900;}}
+.rewardgrid{{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}}
+.reward{{background:white;border:1px solid #EDE7F8;border-radius:22px;padding:18px;box-shadow:0 10px 24px rgba(51,34,101,.055);}}
+.rnum{{font-size:31px;font-weight:950;color:#2B244D;letter-spacing:-.8px;}}
+.rlab{{font-size:14px;color:#817B97;font-weight:800;}}
+.nav{{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid #EDE7F8;padding-top:15px;text-align:center;font-size:13px;font-weight:900;color:#5F5875;}}
+.nav div:first-child{{color:#7B4DFF;}}
+.panel{{background:white;border:1px solid #EDE7F8;border-radius:30px;padding:24px;box-shadow:0 18px 45px rgba(51,34,101,.075);}}
+.panel h3{{margin-top:0;font-size:25px;}}
+.panel p{{color:#817B97;line-height:1.5;font-size:14px;}}
+.kpi{{background:#FAF7FF;border:1px solid #EDE7F8;border-radius:20px;padding:16px;margin-bottom:13px;}}
+.kval{{font-size:31px;font-weight:950;color:#2B244D;}}
+.klab{{font-size:13px;color:#817B97;font-weight:750;}}
+@media(max-width:900px){{
+  .wrap{{grid-template-columns:1fr;}}
+  .prefgrid,.missiongrid,.rewardgrid{{grid-template-columns:1fr;}}
+  .map{{height:auto;padding:70px 14px;}}
+  .pin{{position:relative;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;margin:10px 0;width:auto;}}
+}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="shell">
+    <div class="top">
+      <div class="person">
+        <div class="avatar"></div>
+        <div><div class="greet">Hi, Mia</div><div class="sub">Let's plan your perfect mall trip</div></div>
+      </div>
+      <div class="points">2,480 pts</div>
     </div>
-    """, unsafe_allow_html=True)
 
-with right:
-    st.markdown(f"""
-    <div class="panel">
-        <h3>Merchant impact</h3>
-        <p>Prototype dashboard for Yintai and stores to measure AI-guided journeys.</p>
-        <div class="kpi"><div class="kpi-val">+28%</div><div class="kpi-lab">Route-start uplift simulation</div></div>
-        <div class="kpi"><div class="kpi-val">18.7%</div><div class="kpi-lab">Coupon redemption simulation</div></div>
-        <div class="kpi"><div class="kpi-val">{len(route)}</div><div class="kpi-lab">Recommended journey stops</div></div>
-        <div class="kpi"><div class="kpi-val">{total_time}</div><div class="kpi-lab">Estimated journey minutes</div></div>
+    <div class="sec"><b>Your preferences</b><span>Edit</span></div>
+    <div class="prefgrid">
+      <div class="pref"><div class="ico"></div><div class="lab">Budget</div><div class="val">¥{budget}</div></div>
+      <div class="pref"><div class="ico"></div><div class="lab">Time</div><div class="val">{round(available_time/60,1)}h</div></div>
+      <div class="pref"><div class="ico"></div><div class="lab">Style</div><div class="val" style="font-size:20px;">{esc(style.title())}</div></div>
     </div>
-    """, unsafe_allow_html=True)
 
-st.markdown('<div class="white-card">', unsafe_allow_html=True)
+    <div class="sec"><b>Your AI Mall Journey</b><span>Est. {round(total_time/60,1)}h</span></div>
+    <div class="map">
+      <svg viewBox="0 0 900 360" preserveAspectRatio="none">
+        <path d="M90 145 C170 60, 295 70, 385 125 S585 170, 680 118 S845 130, 808 225 S625 318, 480 278 S255 246, 166 300"
+          fill="none" stroke="#7B4DFF" stroke-width="6" stroke-linecap="round" stroke-dasharray="14 13" opacity=".88"/>
+      </svg>
+      <div class="start"><div class="startdot">S</div>Start<br>Main entrance</div>
+      <div class="pin pin1"><div class="ptitle"><div class="num"><span>1</span></div>{names[0]}</div><div class="pmeta">{cats[0]} · {times[0]} min</div></div>
+      <div class="pin pin2"><div class="ptitle"><div class="num"><span>2</span></div>{names[1]}</div><div class="pmeta">{cats[1]} · {times[1]} min</div></div>
+      <div class="pin pin3"><div class="ptitle"><div class="num"><span>3</span></div>{names[2]}</div><div class="pmeta">{cats[2]} · {times[2]} min</div></div>
+      <div class="pin pin4"><div class="ptitle"><div class="num"><span>4</span></div>{names[3]}</div><div class="pmeta">{cats[3]} · {times[3]} min</div></div>
+      <div class="end"><div class="enddot"></div>End<br>South exit</div>
+    </div>
+
+    <div class="sec"><b>AI Shopping Missions</b><span>Ready to test</span></div>
+    <div class="missiongrid">
+      <div class="mission"><div class="mico"></div><div class="mtitle">{missions[0][:70]}</div><div class="mpoints">+200 pts</div><div class="mstate">Available</div></div>
+      <div class="mission"><div class="mico"></div><div class="mtitle">{missions[1][:70]}</div><div class="mpoints">+100 pts</div><div class="mstate">Available</div></div>
+      <div class="mission"><div class="mico"></div><div class="mtitle">{missions[2][:70]}</div><div class="mpoints">+80 pts</div><div class="mstate">Available</div></div>
+      <div class="mission"><div class="mico"></div><div class="mtitle">{missions[3][:70]}</div><div class="mpoints">+120 pts</div><div class="mstate">Available</div></div>
+    </div>
+
+    <div class="sec"><b>Your Rewards</b><span>Prototype</span></div>
+    <div class="rewardgrid">
+      <div class="reward"><div class="rnum">2,480</div><div class="rlab">Points</div></div>
+      <div class="reward"><div class="rnum">3</div><div class="rlab">Coupons</div></div>
+      <div class="reward"><div class="rnum">5</div><div class="rlab">Check-ins</div></div>
+    </div>
+    <br>
+    <div class="nav"><div>Home</div><div>Missions</div><div>Map</div><div>Rewards</div><div>Me</div></div>
+  </div>
+
+  <div class="panel">
+    <h3>Merchant impact</h3>
+    <p>Prototype dashboard for Yintai and stores to measure AI-guided journeys.</p>
+    <div class="kpi"><div class="kval">+28%</div><div class="klab">Route-start uplift simulation</div></div>
+    <div class="kpi"><div class="kval">18.7%</div><div class="klab">Coupon redemption simulation</div></div>
+    <div class="kpi"><div class="kval">{len(route)}</div><div class="klab">Recommended journey stops</div></div>
+    <div class="kpi"><div class="kval">{total_time}</div><div class="klab">Estimated journey minutes</div></div>
+  </div>
+</div>
+</body>
+</html>
+"""
+
+components.html(app_html, height=1120, scrolling=False)
+
+st.markdown('<div class="app-card">', unsafe_allow_html=True)
 st.subheader("AI recommendation details")
 cols = st.columns(4)
 for i, row in enumerate(route):
     with cols[i]:
-        st.markdown(f"""
-        <div class="detail-card">
-            <div class="detail-index">STOP {i+1}</div>
-            <div class="detail-title">{esc(safe(row, "store_name"))}</div>
-            <div class="detail-meta">{esc(safe(row, "category"))} · {esc(safe(row, "zone"))} · {esc(safe(row, "floor"))}</div>
-            <div class="detail-copy">{esc(safe(row, "ai_reason", safe(row, "best_for")))}</div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(
+            f"""
+            <div style="background:white;border:1px solid #EDE7F8;border-radius:22px;padding:17px;min-height:185px;box-shadow:0 10px 24px rgba(51,34,101,.055);">
+                <div style="font-size:12px;color:#7B4DFF;font-weight:950;">STOP {i+1}</div>
+                <div style="font-size:18px;font-weight:950;margin:6px 0;">{esc(safe(row, "store_name"))}</div>
+                <div style="font-size:12px;color:#817B97;margin-bottom:9px;">{esc(safe(row, "category"))} · {esc(safe(row, "zone"))} · {esc(safe(row, "floor"))}</div>
+                <div style="font-size:13px;line-height:1.45;color:#423D5D;">{esc(safe(row, "ai_reason", safe(row, "best_for")))}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 st.markdown('</div>', unsafe_allow_html=True)
 
-st.markdown('<div class="white-card">', unsafe_allow_html=True)
+st.markdown('<div class="app-card">', unsafe_allow_html=True)
 st.subheader("Real-time AI adaptation")
 change_text = st.text_input("Test a behavior change", value="I spent 25 minutes in Nike because I liked the shoes.")
 if st.button("Update journey based on behavior"):
     insight, action, bonus, reward, suggested = adapt_route(change_text, stores)
-    st.markdown(f"""
-    <div class="adapt-result">
-        <h3>MiaoGo updated the journey</h3>
-        <p>{esc(insight)} {esc(action)}</p>
-        <p><b>New bonus mission:</b> {esc(bonus)}</p>
-        <p><b>New reward:</b> {esc(reward)}</p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        f"""
+        <div style="background:linear-gradient(135deg,#F3EEFF,#FFF5FA);border:1px solid #E6DAFF;border-radius:22px;padding:18px;margin-top:14px;">
+            <h3>MiaoGo updated the journey</h3>
+            <p style="color:#5F5875;">{esc(insight)} {esc(action)}</p>
+            <p><b>New bonus mission:</b> {esc(bonus)}</p>
+            <p><b>New reward:</b> {esc(reward)}</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     scols = st.columns(3)
     for col, (_, row) in zip(scols, suggested.iterrows()):
         with col:
-            st.markdown(f"""
-            <div class="detail-card">
-                <div class="detail-title">{esc(safe(row, "store_name"))}</div>
-                <div class="detail-meta">{esc(safe(row, "category"))} · {esc(safe(row, "estimated_time_min", "20"))} min</div>
-                <div class="detail-copy"><b>Mission:</b> {esc(safe(row, "mission"))}<br><br><b>Reward:</b> {esc(safe(row, "reward"))}</div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown(
+                f"""
+                <div style="background:white;border:1px solid #EDE7F8;border-radius:22px;padding:17px;min-height:170px;box-shadow:0 10px 24px rgba(51,34,101,.055);">
+                    <div style="font-size:18px;font-weight:950;margin-bottom:4px;">{esc(safe(row, "store_name"))}</div>
+                    <div style="font-size:12px;color:#817B97;margin-bottom:9px;">{esc(safe(row, "category"))} · {esc(safe(row, "estimated_time_min", "20"))} min</div>
+                    <div style="font-size:13px;line-height:1.45;color:#423D5D;"><b>Mission:</b> {esc(safe(row, "mission"))}<br><br><b>Reward:</b> {esc(safe(row, "reward"))}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 st.markdown('</div>', unsafe_allow_html=True)
 
 st.subheader("Mission test")
