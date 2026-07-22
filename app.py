@@ -1,4 +1,3 @@
-
 from datetime import datetime
 import os
 import re
@@ -497,8 +496,8 @@ if generate or "journey" not in st.session_state:
 else:
     journey = st.session_state["journey"]
     ranked = st.session_state["ranked"]
-    used_ai = st.session_state["used_ai"]
-    ai_status = st.session_state["ai_status"]
+    used_ai = st.session_state.get("used_ai", False)
+    ai_status = st.session_state.get("ai_status", "Smart fallback active")
 
 st.markdown(f"""
 <div class="ai-box">
